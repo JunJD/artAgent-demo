@@ -1,52 +1,77 @@
-# React Flow [live demo](https://chatbot-flow-builder.vercel.app/)
+# ArtAgent - AI 艺术创作平台
 
-![](https://github.com/sidx8/Chatbot-flow-builder/blob/main/public/demo.gif)
-This project is a simple React application built with [React Flow](https://reactflow.dev/) and next.js . It demonstrates the implementation of drag and drop nodes with the ability to connect them. The state of the nodes and their connections can be saved and restored.
+ArtAgent 是一个基于 AI 技术的艺术创作平台，让用户能够通过直观的界面创建 AI 艺术作品。
 
-## Features
+## 技术栈
 
-1. Drag and drop nodes.
-2. Connect nodes by clicking and dragging from one node's edge to another.
-3. Clicking on a node selects it, and its label can be modified from the sidebar.
-4. Clicking anywhere on the pane deselects the selected node.
-5. Save and restore functionality, which saves the current state of the nodes and their connections, and can restore the state later.
+- Next.js 13+ (App Router)
+- React 18
+- Tailwind CSS
+- Shadcn/ui
+- React Flow
+- TypeScript
 
-## Setup and Installation
+## 核心功能
 
-First, clone the repository to your local machine:
+### 1. 首页
+- 现代简约的登录页面
+- 特性展示区域
+  - AI 驱动创作
+  - 丰富艺术风格
+  - 智能艺术导师
+- 项目展示画廊
+- 快速开始创作按钮
 
-```bash
-git clone https://github.com/sidx8/Chatbot-flow-builder.git
-```
+### 2. 流程编排页面
+- 可视化节点编辑器
+  - 文本输入节点
+  - 图像生成节点
+  - AI 模型选择节点
+  - 艺术风格节点
+- 侧边栏工具面板
+- 节点连接与流程控制
+- 实时预览
+- 作品保存与加载
 
-Navigate into the project directory:
+## 项目实施计划
 
-```bash
-cd [project-folder-name]
-```
+### 阶段 1: 项目初始化与基础设置
+- [x] 创建 Next.js 项目
+- [x] 配置 Tailwind CSS
+- [ ] 安装并配置 shadcn/ui
+- [ ] 设置项目文件结构
+- [ ] 配置 TypeScript
 
-Install the project dependencies:
+### 阶段 2: 首页开发
+- [ ] 实现页面布局
+- [ ] 创建导航栏组件
+- [ ] 设计特性展示区域
+- [ ] 实现项目画廊
+- [ ] 添加 CTA 按钮与动画
 
-```bash
-npm install
-```
+### 阶段 3: 流程编排页面
+- [ ] 集成 React Flow
+- [ ] 创建基础节点类型
+- [ ] 实现节点拖拽功能
+- [ ] 设计节点连接逻辑
+- [ ] 开发侧边栏工具面板
 
-To start the project in development mode:
+### 阶段 4: AI 功能集成
+- [ ] 集成 Stable Diffusion API
+- [ ] 实现文本优化功能
+- [ ] 添加风格迁移选项
+- [ ] 创建图像生成流程
 
-```bash
-npm start
-```
+### 阶段 5: 用户体验优化
+- [ ] 添加加载状态
+- [ ] 实现错误处理
+- [ ] 优化响应式设计
+- [ ] 添加引导提示
 
-The application should now be running on http://localhost:3000.
+### 阶段 6: 部署与测试
+- [ ] 进行单元测试
+- [ ] 性能优化
+- [ ] 部署到生产环境
+- [ ] 用户反馈收集
 
-## Deployment
-
-The project can be deployed on any hosting service that supports Node.js applications. Examples of such services include Heroku, Vercel, and Netlify. Please refer to the respective platform's documentation for deploying React applications.
-
-## Contributing
-
-If you want to contribute to this project, you're always welcome! You can take a look at [contributing.md](https://github.com/sidx8/Chatbot-flow-builder/blob/main/CONTRIBUTING.md).
-
-## Support
-
-If you are having issues with the project, please let me know. i have an email, siddharth0sinha@gmail.com, where you can reach out to me.
+## 项目结构

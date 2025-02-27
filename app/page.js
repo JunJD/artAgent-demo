@@ -1,266 +1,150 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-"use client";
-
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
-import ReactFlow, {
-  ReactFlowProvider,
-  addEdge,
-  useNodesState,
-  useEdgesState,
-  Panel,
-  useReactFlow,
-  MiniMap,
-  Controls,
-  Background,
-} from "reactflow";
-import "reactflow/dist/base.css";
-
-import "../tailwind.config.js";
-import Sidebar from "./component/sidebar";
-import TextNode from "./component/TextNode";
-
-// Key for local storage
-const flowKey = "flow-key";
-
-// Initial node setup
-const initialNodes = [
-  {
-    id: "1",
-    type: "textnode",
-    data: { label: "input nodes" },
-    position: { x: 250, y: 5 },
-  },
-];
-
-let id = 0;
-
-// Function for generating unique IDs for nodes
-const getId = () => `node_${id++}`;
-
-const App = () => {
-  // Define custom node types
-  const nodeTypes = useMemo(
-    () => ({
-      textnode: TextNode,
-    }),
-    []
-  );
-
-  // States and hooks setup
-  const reactFlowWrapper = useRef(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const [selectedElements, setSelectedElements] = useState([]);
-  const [nodeName, setNodeName] = useState("");
-
-  // Update nodes data when nodeName or selectedElements changes
-  useEffect(() => {
-    if (selectedElements.length > 0) {
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === selectedElements[0]?.id) {
-            node.data = {
-              ...node.data,
-              label: nodeName,
-            };
-          }
-          return node;
-        })
-      );
-    } else {
-      setNodeName(""); // Clear nodeName when no node is selected
-    }
-  }, [nodeName, selectedElements, setNodes]);
-
-  // Handle node click
-  const onNodeClick = useCallback((event, node) => {
-    setSelectedElements([node]);
-    setNodeName(node.data.label);
-    setNodes((nodes) =>
-      nodes.map((n) => ({
-        ...n,
-        selected: n.id === node.id,
-      }))
-    );
-  }, []);
-
-  // Setup viewport
-  const { setViewport } = useReactFlow();
-
-  // Check for empty target handles
-  const checkEmptyTargetHandles = () => {
-    let emptyTargetHandles = 0;
-    edges.forEach((edge) => {
-      if (!edge.targetHandle) {
-        emptyTargetHandles++;
-      }
-    });
-    return emptyTargetHandles;
-  };
-
-  // Check if any node is unconnected
-  const isNodeUnconnected = useCallback(() => {
-    let unconnectedNodes = nodes.filter(
-      (node) =>
-        !edges.find(
-          (edge) => edge.source === node.id || edge.target === node.id
-        )
-    );
-
-    return unconnectedNodes.length > 0;
-  }, [nodes, edges]);
-
-  // Save flow to local storage
-  const onSave = useCallback(() => {
-    if (reactFlowInstance) {
-      const emptyTargetHandles = checkEmptyTargetHandles();
-
-      if (nodes.length > 1 && (emptyTargetHandles > 1 || isNodeUnconnected())) {
-        alert(
-          "Error: More than one node has an empty target handle or there are unconnected nodes."
-        );
-      } else {
-        const flow = reactFlowInstance.toObject();
-        localStorage.setItem(flowKey, JSON.stringify(flow));
-        alert("Save successful!"); // Provide feedback when save is successful
-      }
-    }
-  }, [reactFlowInstance, nodes, isNodeUnconnected]);
-
-  // Restore flow from local storage
-  const onRestore = useCallback(() => {
-    const restoreFlow = async () => {
-      const flow = JSON.parse(localStorage.getItem(flowKey));
-
-      if (flow) {
-        const { x = 0, y = 0, zoom = 1 } = flow.viewport;
-        setNodes(flow.nodes || []);
-        setEdges(flow.edges || []);
-        setViewport({ x, y, zoom });
-      }
-    };
-
-    restoreFlow();
-  }, [setNodes, setViewport]);
-
-  // Handle edge connection
-  const onConnect = useCallback(
-    (params) => {
-      console.log("Edge created: ", params);
-      setEdges((eds) => addEdge(params, eds));
-    },
-    [setEdges]
-  );
-
-  // Enable drop effect on drag over
-  const onDragOver = useCallback((event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-  }, []);
-
-  // Handle drop event to add a new node
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
-
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-      const type = event.dataTransfer.getData("application/reactflow");
-
-      if (typeof type === "undefined" || !type) {
-        return;
-      }
-
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-      const newNode = {
-        id: getId(),
-        type,
-        position,
-        data: { label: `${type}` },
-      };
-
-      console.log("Node created: ", newNode);
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [reactFlowInstance]
-  );
-
-  const rfStyle = {
-    backgroundColor: "#ffffff",
-  };
-
+import Link from 'next/link'
+import Image from 'next/image'
+import { Button } from "@/components/ui/button"
+export default function Home() {
   return (
-    <div className="flex flex-row min-h-screen lg:flex-row">
-      <div className="flex-grow h-screen" ref={reactFlowWrapper}>
-        <ReactFlow
-          nodes={nodes}
-          nodeTypes={nodeTypes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onInit={setReactFlowInstance}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          style={rfStyle}
-          onNodeClick={onNodeClick}
-          onPaneClick={() => {
-            setSelectedElements([]); // Reset selected elements when clicking on pane
-            setNodes((nodes) =>
-              nodes.map((n) => ({
-                ...n,
-                selected: false, // Reset selected state of nodes when clicking on pane
-              }))
-            );
-          }}
-          fitView
-        >
-          <Background variant="dots" gap={12} size={1} />
-          <Controls />
-          <MiniMap zoomable pannable />
-          <Panel>
-            <button
-              className=" m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={onSave}
-            >
-              save flow
-            </button>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={onRestore}
-            >
-              restore flow
-            </button>
-          </Panel>
-        </ReactFlow>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      {/* 导航栏 */}
+      <header className="border-b bg-white/50 backdrop-blur-sm fixed w-full z-50">
+        <div className="container flex h-16 items-center px-4 mx-auto">
+          <div className="flex gap-6 md:gap-10">
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+                ArtAgent
+              </span>
+            </Link>
+          </div>
+          <div className="ml-auto flex items-center space-x-4">
+            <Button variant="ghost" asChild>
+              <Link href="/tutorial">观看教程</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/flow">立即开始创作</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
 
-      <Sidebar
-        nodeName={nodeName}
-        setNodeName={setNodeName}
-        selectedNode={selectedElements[0]}
-        setSelectedElements={setSelectedElements}
-      />
+      {/* 主要内容 */}
+      <main className="pt-16">
+        {/* Hero 区域 */}
+        <section className="py-20 md:py-32 relative overflow-hidden">
+          <div className="container px-4 mx-auto relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+                ArtAgent - 智能艺术创作平台
+              </h1>
+              <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                利用 AI 技术，激发你的艺术灵感，创作独特作品
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button size="lg" className="text-lg px-8" asChild>
+                  <Link href="/flow">立即开始创作</Link>
+                </Button>
+                <Button size="lg" variant="outline" className="text-lg px-8" asChild>
+                  <Link href="/tutorial">查看教程</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-50" />
+        </section>
+
+        {/* 特性区域 */}
+        <section className="py-20 bg-white">
+          <div className="container px-4 mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">平台特性</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-100">
+                <div className="text-3xl mb-4">🤖</div>
+                <h3 className="text-xl font-semibold mb-2">AI 驱动创作</h3>
+                <p className="text-gray-600">
+                  结合多种 AI 模型，让创作过程更加智能和高效
+                </p>
+              </div>
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-100">
+                <div className="text-3xl mb-4">🎨</div>
+                <h3 className="text-xl font-semibold mb-2">丰富艺术风格</h3>
+                <p className="text-gray-600">
+                  支持多种艺术流派，满足不同创作需求
+                </p>
+              </div>
+              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-100">
+                <div className="text-3xl mb-4">👨‍🏫</div>
+                <h3 className="text-xl font-semibold mb-2">智能艺术导师</h3>
+                <p className="text-gray-600">
+                  AI 辅助教学，帮助你提升艺术创作能力
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 项目展示区域 */}
+        <section className="py-20 bg-gray-50">
+          <div className="container px-4 mx-auto">
+            <div className="flex justify-between items-center mb-12">
+              <h2 className="text-3xl font-bold">我的项目</h2>
+              <Button variant="outline" asChild>
+                <Link href="/flow">创建新项目</Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* 项目卡片 */}
+              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-[4/3] bg-gray-100 relative group">
+                  <Image 
+                    src="/path/to/image1.jpg" 
+                    alt="向日葵油画"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button variant="secondary">查看详情</Button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">向日葵油画</h3>
+                  <p className="text-sm text-gray-500">创作于 2024-01-20</p>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-[4/3] bg-gray-100 relative group">
+                  <Image 
+                    src="/path/to/image2.jpg" 
+                    alt="油画1"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button variant="secondary">查看详情</Button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">油画1</h3>
+                  <p className="text-sm text-gray-500">创作于 2024-10-12</p>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-[4/3] bg-gray-100 relative group">
+                  <Image 
+                    src="/path/to/image3.jpg" 
+                    alt="油画2"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Button variant="secondary">查看详情</Button>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-1">油画2</h3>
+                  <p className="text-sm text-gray-500">创作于 2024-11-18</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
-  );
-};
-
-// Wrap App with ReactFlowProvider
-function FlowWithProvider() {
-  return (
-    <ReactFlowProvider>
-      <App />
-    </ReactFlowProvider>
-  );
+  )
 }
-
-export default FlowWithProvider;
