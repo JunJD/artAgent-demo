@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState, useMemo } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import ReactFlow, {
   Background,
   Controls,
@@ -19,14 +19,12 @@ import { ImageVariationNode } from './nodes/image-variation-node'
 import { nodeTypes as nodeConfig, getNodeDefaults } from '@/lib/flow-nodes'
 import { Button } from '@/components/ui/button'
 import { Play, Save, Undo } from 'lucide-react'
-import { imageVariation } from '@/lib/api-service'
-import { textToImage } from '@/app/action/textToImage'
-import {  getImagesByStatus } from '@/app/action/getImagesByStatus'
+import { generateImage, checkImageStatus, createImageVariation } from '@/lib/api-service'
 import { toast } from '@/hooks/use-toast'
 import { StartNode } from './nodes/start-node'
 import { EndNode } from './nodes/end-node'
 
-// 将 nodeTypes 移到组件外部并使用 useMemo
+// 注册节点类型
 const nodeTypes = {
   start: StartNode,
   end: EndNode,
@@ -158,6 +156,31 @@ export default function FlowEditor() {
     return sorted
   }, [nodes, edges])
 
+  const pollImageStatus = async (generateUuid, maxAttempts = 60) => {
+    let attempts = 0
+    
+    while (attempts < maxAttempts) {
+      const statusResult = await checkImageStatus(generateUuid)
+      console.log('Poll attempt', attempts + 1, statusResult)
+
+      if (statusResult.status === 'success') {
+        return statusResult.images
+      }
+
+      // 如果还在进行中，等待1秒后重试
+      if (statusResult.status === 'pending') {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        attempts++
+        continue
+      }
+
+      // 其他情况抛出错误
+      throw new Error('图像生成失败')
+    }
+
+    throw new Error('等待超时')
+  }
+
   // 执行单个节点
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const executeNode = async (nodeId, inputData) => {
@@ -174,12 +197,10 @@ export default function FlowEditor() {
       let result
       switch (node.type) {
         case 'start':
-          // 开始节点不需要处理，直接传递
           result = { flow: true }
           break
 
         case 'end':
-          // 结束节点只需要保存输入的图像
           result = { 
             image: inputData.image,
             flow: true 
@@ -194,22 +215,31 @@ export default function FlowEditor() {
           break
 
         case 'imageGen':
-          const response = await textToImage({
-            ...node.data,
-            ...inputData
-          })
+          const response = await generateImage(
+            inputData.text,
+            node.data.width,
+            node.data.height
+          )
           const generateUuid = response.generateUuid
-          const images = await getImagesByStatus(generateUuid)
+          console.log('generateUuid', generateUuid)
+          
+          // 使用轮询函数
+          const images = await pollImageStatus(generateUuid)
+          console.log('final images', images)
+          
           result = {
-            image: images[0].image
+            image: images[0]?.imageUrl
           }
           break
 
         case 'imageVariation':
-          const varResponse = await imageVariation({
-            ...node.data,
-            ...inputData
-          })
+          const varResponse = await createImageVariation(
+            inputData.image,
+            inputData.text,
+            node.data.strength,
+            node.data.cfg_scale,
+            node.data.steps
+          )
           result = {
             image: varResponse.artifacts[0].base64
           }
