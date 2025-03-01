@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import ReactFlow, {
   Background,
   Controls,
@@ -23,6 +23,8 @@ import { generateImage, checkImageStatus, createImageVariation } from '@/lib/api
 import { toast } from '@/hooks/use-toast'
 import { StartNode } from './nodes/start-node'
 import { EndNode } from './nodes/end-node'
+import { useProjects } from '@/lib/hooks/use-projects'
+import { useAutoSave } from '@/lib/hooks/use-auto-save'
 
 // 注册节点类型
 const nodeTypes = {
@@ -55,6 +57,18 @@ export default function FlowEditor() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [isProcessing, setIsProcessing] = useState(false)
   const { project } = useReactFlow()
+  const { currentProject, updateFlowData, setProjectCover } = useProjects()
+  
+  // 使用自动保存
+  useAutoSave(nodes, edges)
+  
+  // 初始化流程图数据
+  useEffect(() => {
+    if (currentProject?.flowData?.nodes?.length) {
+      setNodes(currentProject.flowData.nodes)
+      setEdges(currentProject.flowData.edges)
+    }
+  }, [currentProject, setNodes, setEdges])
 
   // 处理节点连接
   const onConnect = useCallback((params) => {
@@ -306,24 +320,23 @@ export default function FlowEditor() {
     }
   }, [buildExecutionGraph, edges, executeNode])
 
-  // 保存流程
+  // 修改保存流程函数
   const saveFlow = useCallback(() => {
-    const flow = {
-      nodes: nodes.map(node => ({
-        ...node,
-        data: {
-          ...node.data,
-          onChange: undefined // 移除函数以便序列化
-        }
-      })),
-      edges
+    if (!currentProject) return
+    
+    updateFlowData(currentProject.id, nodes, edges)
+    
+    // 如果有结束节点且有图像，设置为项目封面
+    const endNode = nodes.find(node => node.type === 'end')
+    if (endNode?.data?.image) {
+      setProjectCover(currentProject.id, endNode.data.image)
     }
-    localStorage.setItem('artflow', JSON.stringify(flow))
+    
     toast({
-      title: "流程保存成功",
-      description: "流程已保存到本地存储",
+      title: '保存成功',
+      description: '流程图已保存',
     })
-  }, [nodes, edges])
+  }, [nodes, edges, currentProject, updateFlowData, setProjectCover])
 
   // 在 FlowEditor 组件中添加连接验证
   const onConnectStart = useCallback((_, { nodeId, handleType, handleId }) => {

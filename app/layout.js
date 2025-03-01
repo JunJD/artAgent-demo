@@ -1,5 +1,6 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { StoreProvider } from '@/lib/store/store-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,7 +13,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="zh" suppressHydrationWarning>
       <body className={`min-h-screen bg-background ${inter.className}`} suppressHydrationWarning>
-        {children}
+        <StoreProvider>
+          {children}
+        </StoreProvider>
       </body>
     </html>
   )

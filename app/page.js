@@ -1,7 +1,18 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
+import { useProjects } from '@/lib/hooks/use-projects'
+import { formatDate } from '@/lib/utils'
+
 export default function Home() {
+  const { projects, createNewProject, setCurrentProject } = useProjects()
+  
+  const handleCreateProject = () => {
+    createNewProject('新项目', '我的创作项目')
+  }
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* 导航栏 */}
@@ -18,7 +29,7 @@ export default function Home() {
             <Button variant="ghost" asChild>
               <Link href="/tutorial">观看教程</Link>
             </Button>
-            <Button asChild>
+            <Button asChild onClick={() => handleCreateProject()}>
               <Link href="/flow">立即开始创作</Link>
             </Button>
           </div>
@@ -85,63 +96,55 @@ export default function Home() {
           <div className="container px-4 mx-auto">
             <div className="flex justify-between items-center mb-12">
               <h2 className="text-3xl font-bold">我的项目</h2>
-              <Button variant="outline" asChild>
+              <Button variant="outline" onClick={handleCreateProject} asChild>
                 <Link href="/flow">创建新项目</Link>
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* 项目卡片 */}
-              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] bg-gray-100 relative group">
-                  <Image 
-                    src="/path/to/image1.jpg" 
-                    alt="向日葵油画"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="secondary">查看详情</Button>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">向日葵油画</h3>
-                  <p className="text-sm text-gray-500">创作于 2024-01-20</p>
-                </div>
+            
+            {projects.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                <p className="text-gray-500 mb-4">还没有创建任何项目</p>
+                <Button onClick={handleCreateProject} asChild>
+                  <Link href="/flow">创建第一个项目</Link>
+                </Button>
               </div>
-              
-              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] bg-gray-100 relative group">
-                  <Image 
-                    src="/path/to/image2.jpg" 
-                    alt="油画1"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="secondary">查看详情</Button>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {projects.map(project => (
+                  <div key={project.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div className="aspect-[4/3] bg-gray-100 relative group">
+                      {project.coverImage ? (
+                        <Image 
+                          src={project.coverImage} 
+                          alt={project.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          无预览图
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button 
+                          variant="secondary"
+                          onClick={() => {
+                            setCurrentProject(project.id)
+                          }}
+                          asChild
+                        >
+                          <Link href="/flow">查看详情</Link>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-1">{project.title}</h3>
+                      <p className="text-sm text-gray-500">创作于 {formatDate(project.createdAt)}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">油画1</h3>
-                  <p className="text-sm text-gray-500">创作于 2024-10-12</p>
-                </div>
+                ))}
               </div>
-
-              <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="aspect-[4/3] bg-gray-100 relative group">
-                  <Image 
-                    src="/path/to/image3.jpg" 
-                    alt="油画2"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="secondary">查看详情</Button>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-1">油画2</h3>
-                  <p className="text-sm text-gray-500">创作于 2024-11-18</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       </main>
