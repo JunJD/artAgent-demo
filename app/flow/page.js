@@ -28,7 +28,7 @@ export default function FlowPage() {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute -left-12 top-4 bg-white shadow-sm border"
+          className="absolute -left-14 top-4 bg-white shadow-sm border"
           onClick={() => setIsChatOpen(!isChatOpen)}
         >
           {isChatOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

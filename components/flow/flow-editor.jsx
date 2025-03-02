@@ -398,7 +398,7 @@ export default function FlowEditor() {
         <Background />
         <Controls />
         <MiniMap />
-        <Panel position="top-right" className="flex gap-2">
+        <Panel position="top-right" className="flex gap-2 right-14">
           <Button 
             variant="secondary"
             size="sm"
