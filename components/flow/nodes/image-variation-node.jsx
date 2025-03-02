@@ -9,6 +9,7 @@ import { Eye } from 'lucide-react'
 // 图生图模型列表
 const models = [
   { value: '07e00af4fc464c7ab55ff906f8acf1b7', label: '星流Star-3 Alpha图生图' },
+  { value: '9c7d531dc75f476aa833b3d452b8f7ad', label: '1.5和XL图生图' },
 ]
 
 export function ImageVariationNode({ data, selected }) {
@@ -16,6 +17,19 @@ export function ImageVariationNode({ data, selected }) {
   
   // 获取当前节点生成的图像
   const nodeImage = data.image || data.image;
+  
+  // 初始化模型特定参数（如果尚未设置）
+  if (!data.strength) {
+    data.onChange?.({ strength: 0.75 });
+  }
+  
+  if (!data.imgCount) {
+    data.onChange?.({ imgCount: 1 });
+  }
+  
+  // 判断当前选择的是哪种模型
+  const isStandardModel = data.model === '9c7d531dc75f476aa833b3d452b8f7ad'; // 1.5和XL
+  const isUltraModel = data.model === '07e00af4fc464c7ab55ff906f8acf1b7'; // 星流Star-3 Alpha
 
   return (
     <BaseNode
@@ -87,8 +101,11 @@ export function ImageVariationNode({ data, selected }) {
             />
           </div>
 
+          {/* 通用参数 - 所有模型都显示 */}
           <div>
-            <label className="text-sm text-gray-600 mb-1 block">变化强度</label>
+            <label className="text-sm text-gray-600 mb-1 block">
+              {isStandardModel ? '去噪强度' : '变化强度'}
+            </label>
             <Slider
               value={[data.strength]}
               onValueChange={([value]) => data.onChange?.({ strength: value })}
@@ -112,6 +129,42 @@ export function ImageVariationNode({ data, selected }) {
             />
             <div className="text-sm text-gray-500 text-right">{data.imgCount}</div>
           </div>
+          
+          {/* 1.5和XL模型的特定参数 */}
+          {isStandardModel && (
+            <div className="p-3 bg-blue-50 rounded-md">
+              <div className="text-sm font-medium text-blue-700 mb-2">1.5和XL模型参数</div>
+              
+              <div className="text-xs text-gray-600 mb-1">
+                <div className="flex justify-between my-1">
+                  <span>采样器:</span>
+                  <span className="font-medium">Euler a (15)</span>
+                </div>
+                <div className="flex justify-between my-1">
+                  <span>步数:</span>
+                  <span className="font-medium">20</span>
+                </div>
+                <div className="flex justify-between my-1">
+                  <span>CFG比例:</span>
+                  <span className="font-medium">7</span>
+                </div>
+                <div className="flex justify-between my-1">
+                  <span>调整后尺寸:</span>
+                  <span className="font-medium">768×1024</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 星流Star-3 Alpha模型的特定参数 */}
+          {isUltraModel && (
+            <div className="p-3 bg-purple-50 rounded-md">
+              <div className="text-sm font-medium text-purple-700 mb-2">星流Star-3参数</div>
+              <div className="text-xs text-gray-600">
+                使用星流Star-3 Alpha优化的生成参数
+              </div>
+            </div>
+          )}
           
           {/* 显示生成状态 */}
           {data.isProcessing && (

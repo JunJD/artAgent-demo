@@ -9,6 +9,7 @@ import { Eye } from 'lucide-react'
 // 根据文档中的模型信息更新模型列表
 const models = [
   { value: '5d7e67009b344550bc1aa6ccbfa1d7f4', label: '星流Star-3 Alpha文生图' },
+  { value: 'e10adc3949ba59abbe56e057f20f883e', label: '1.5和XL文生图' },
 ]
 
 // 预设的尺寸比例
@@ -43,6 +44,10 @@ export function ImageGenNode({ data, selected }) {
 
   // 获取当前节点生成的图像
   const nodeImage = data.image || data.image;
+  
+  // 判断当前选择的是哪种模型
+  const isStandardModel = data.model === 'e10adc3949ba59abbe56e057f20f883e'; // 1.5和XL
+  const isUltraModel = data.model === '5d7e67009b344550bc1aa6ccbfa1d7f4'; // 星流Star-3 Alpha
 
   return (
     <BaseNode
@@ -163,6 +168,38 @@ export function ImageGenNode({ data, selected }) {
           {data.aspectRatio !== 'custom' && (
             <div className="text-sm text-gray-500">
               当前尺寸: {data.width} × {data.height}
+            </div>
+          )}
+          
+          {/* 1.5和XL模型的特定参数 */}
+          {isStandardModel && (
+            <div className="p-3 bg-blue-50 rounded-md">
+              <div className="text-sm font-medium text-blue-700 mb-2">1.5和XL模型参数</div>
+              
+              <div className="text-xs text-gray-600 mb-1">
+                <div className="flex justify-between my-1">
+                  <span>采样器:</span>
+                  <span className="font-medium">Euler a (15)</span>
+                </div>
+                <div className="flex justify-between my-1">
+                  <span>步数:</span>
+                  <span className="font-medium">20</span>
+                </div>
+                <div className="flex justify-between my-1">
+                  <span>CFG比例:</span>
+                  <span className="font-medium">7</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 星流Star-3 Alpha模型的特定参数 */}
+          {isUltraModel && (
+            <div className="p-3 bg-purple-50 rounded-md">
+              <div className="text-sm font-medium text-purple-700 mb-2">星流Star-3参数</div>
+              <div className="text-xs text-gray-600">
+                使用星流Star-3 Alpha优化的生成参数
+              </div>
             </div>
           )}
           
