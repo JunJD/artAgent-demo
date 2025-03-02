@@ -64,7 +64,7 @@ export default function TutorialPage() {
                     </div>
                     <h4 className="text-lg font-medium mb-2">开始创建您的第一个项目</h4>
                     <p className="text-sm text-muted-foreground mb-4">按照我们的分步指南快速入门</p>
-                    <Link href="/create" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+                    <Link href="/flow" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
                       创建项目
                     </Link>
                   </div>
@@ -206,7 +206,7 @@ export default function TutorialPage() {
                       </div>
                     </div>
                   </div>
-                  <Link href="/create/stability" className="block py-2 px-4 text-center text-primary-foreground bg-primary rounded-md hover:bg-primary/90">
+                  <Link href="/flow" className="block py-2 px-4 text-center text-primary-foreground bg-primary rounded-md hover:bg-primary/90">
                     尝试 Stability AI 创作
                   </Link>
                 </div>
@@ -284,7 +284,7 @@ export default function TutorialPage() {
                       </div>
                     </div>
                   </div>
-                  <Link href="/create/baidu" className="block py-2 px-4 text-center text-primary-foreground bg-primary rounded-md hover:bg-primary/90">
+                  <Link href="/flow" className="block py-2 px-4 text-center text-primary-foreground bg-primary rounded-md hover:bg-primary/90">
                     尝试百度 AI 创作
                   </Link>
                 </div>
