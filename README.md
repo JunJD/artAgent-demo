@@ -57,10 +57,13 @@ ArtAgent 是一个基于 AI 技术的艺术创作平台，让用户能够通过�
 - [ ] 开发侧边栏工具面板
 
 ### 阶段 4: AI 功能集成
-- [ ] 集成 Stable Diffusion API
+- [ ] 集成星流Star-3 Alpha API
+- [ ] 实现文本到图像生成
 - [ ] 实现文本优化功能
 - [ ] 添加风格迁移选项
-- [ ] 创建图像生成流程
+- [ ] 创建图像变化流程
+- [ ] 实现高级提示词工程
+#### 详细API文档参考: [星流Star-3 Alpha API文档](https://liblibai.feishu.cn/wiki/UAMVw67NcifQHukf8fpccgS5n6d)
 
 ### 阶段 5: 用户体验优化
 - [ ] 添加加载状态
