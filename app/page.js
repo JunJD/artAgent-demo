@@ -5,12 +5,23 @@ import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { useProjects } from '@/lib/hooks/use-projects'
 import { formatDate } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 
 export default function Home() {
   const { projects, createNewProject, setCurrentProject } = useProjects()
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   const handleCreateProject = () => {
     createNewProject('新项目', '我的创作项目')
+  }
+  
+  // 客户端渲染保护
+  if (!isMounted) {
+    return null // 或者返回一个加载指示器
   }
   
   return (
@@ -25,7 +36,7 @@ export default function Home() {
               </span>
             </Link>
           </div>
-          <div className="ml-auto flex items-center space-x-4">
+          <div className="flex items-center ml-auto space-x-4">
             <Button variant="ghost" asChild>
               <Link href="/tutorial">观看教程</Link>
             </Button>

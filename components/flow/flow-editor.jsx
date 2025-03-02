@@ -30,7 +30,7 @@ import { useAutoSave } from '@/lib/hooks/use-auto-save'
 const nodeTypes = {
   start: StartNode,
   end: EndNode,
-  textPrompt: TextPromptNode,
+  // textPrompt: TextPromptNode,
   imageGen: ImageGenNode,
   imageVariation: ImageVariationNode,
 }
@@ -230,9 +230,11 @@ export default function FlowEditor() {
 
         case 'imageGen':
           const response = await generateImage(
-            inputData.text,
+            node.data.prompt ?? inputData.text,
             node.data.width,
-            node.data.height
+            node.data.height,
+            node.data.model,
+            node.data.aspectRatio,
           )
           const generateUuid = response.generateUuid
           console.log('generateUuid', generateUuid)
@@ -249,13 +251,19 @@ export default function FlowEditor() {
         case 'imageVariation':
           const varResponse = await createImageVariation(
             inputData.image,
-            inputData.text,
-            node.data.strength,
-            node.data.cfg_scale,
-            node.data.steps
+            node.data.prompt || inputData.text,
+            node.data.model,
+            node.data.imgCount
           )
+          const varGenerateUuid = varResponse.generateUuid
+          console.log('图生图任务ID', varGenerateUuid)
+          
+          // 使用轮询函数检查状态
+          const varImages = await pollImageStatus(varGenerateUuid)
+          console.log('图生图结果', varImages)
+          
           result = {
-            image: varResponse.artifacts[0].base64
+            image: varImages[0]?.imageUrl
           }
           break
 
