@@ -221,12 +221,12 @@ export default function FlowEditor() {
           }
           break
 
-        case 'textPrompt':
-          result = {
-            text: node.data.text,
-            negative_prompt: node.data.negative_prompt
-          }
-          break
+        // case 'textPrompt':
+        //   result = {
+        //     text: node.data.text,
+        //     negative_prompt: node.data.negative_prompt
+        //   }
+        //   break
 
         case 'imageGen':
           const response = await generateImage(

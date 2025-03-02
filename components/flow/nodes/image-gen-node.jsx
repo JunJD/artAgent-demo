@@ -1,8 +1,10 @@
 import { BaseNode } from './base-node'
 import { Input } from '@/components/ui/input'
-import { Slider } from '@/components/ui/slider'
+import Image from 'next/image'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { useState } from 'react'
+import { Eye } from 'lucide-react'
 
 // 根据文档中的模型信息更新模型列表
 const models = [
@@ -18,6 +20,8 @@ const aspectRatios = [
 ]
 
 export function ImageGenNode({ data, selected }) {
+  const [showPreview, setShowPreview] = useState(false);
+
   // 处理长宽比变化
   const handleAspectRatioChange = (value) => {
     if (value !== 'custom') {
@@ -37,6 +41,9 @@ export function ImageGenNode({ data, selected }) {
     data.onChange?.({ aspectRatio: 'square', width: 1024, height: 1024 });
   }
 
+  // 获取当前节点生成的图像
+  const nodeImage = data.image || data.image;
+
   return (
     <BaseNode
       data={data}
@@ -46,6 +53,30 @@ export function ImageGenNode({ data, selected }) {
       outputs={['image']}
       className="w-[320px]"
     >
+      {/* 图片预览按钮 */}
+      {nodeImage && (
+        <div 
+          className="absolute top-2 right-2 z-10 cursor-pointer bg-white/80 dark:bg-gray-800/80 p-1 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-all"
+          onMouseEnter={() => setShowPreview(true)}
+          onMouseLeave={() => setShowPreview(false)}
+        >
+          <Eye className="h-4 w-4 text-gray-700 dark:text-gray-300" />
+          
+          {/* 悬停显示图片预览 */}
+          {showPreview && (
+            <div className="absolute right-0 top-8 z-50 rounded-md overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700">
+              <Image 
+                src={nodeImage} 
+                alt="生成图像" 
+                width={300}
+                height={300}
+                className="max-w-[300px] max-h-[300px] object-contain bg-white dark:bg-gray-800"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="p-4">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xl">🎨</span>
@@ -132,6 +163,20 @@ export function ImageGenNode({ data, selected }) {
           {data.aspectRatio !== 'custom' && (
             <div className="text-sm text-gray-500">
               当前尺寸: {data.width} × {data.height}
+            </div>
+          )}
+          
+          {/* 显示生成状态 */}
+          {data.isProcessing && (
+            <div className="text-sm text-blue-500">
+              图像生成中...
+            </div>
+          )}
+          
+          {/* 显示错误信息 */}
+          {data.error && (
+            <div className="text-sm text-red-500">
+              错误: {data.error}
             </div>
           )}
         </div>
